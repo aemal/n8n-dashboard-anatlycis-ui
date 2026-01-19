@@ -3,10 +3,11 @@ import { AgGridReact } from "ag-grid-react";
 import { ColDef, ICellRendererParams, themeQuartz } from "ag-grid-community";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme-provider";
 import type { ExecutionLog } from "@shared/schema";
 import { format } from "date-fns";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, ExternalLink, Loader2 } from "lucide-react";
 
 interface ExecutionTableProps {
   data: ExecutionLog[];
@@ -69,6 +70,28 @@ const DurationCellRenderer = (params: ICellRendererParams) => {
   return <span>{(ms / 60000).toFixed(1)}m</span>;
 };
 
+const OpenCellRenderer = (params: ICellRendererParams<ExecutionLog>) => {
+  const data = params.data;
+  if (!data?.workflow_id || !data?.execution_id) {
+    return <span className="text-muted-foreground">-</span>;
+  }
+  
+  const url = `http://localhost:5678/workflow/${data.workflow_id}/executions/${data.execution_id}`;
+  
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-7 px-2 text-primary hover:text-primary"
+      onClick={() => window.open(url, "_blank")}
+      data-testid={`button-open-execution-${data.execution_id}`}
+    >
+      <ExternalLink className="h-4 w-4 mr-1" />
+      Open
+    </Button>
+  );
+};
+
 const lightTheme = themeQuartz.withParams({
   backgroundColor: "#ffffff",
   headerBackgroundColor: "#f4f4f5",
@@ -100,6 +123,17 @@ export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) 
 
   const columnDefs = useMemo<ColDef[]>(
     () => [
+      {
+        headerName: "Open",
+        field: "execution_id",
+        cellRenderer: OpenCellRenderer,
+        width: 100,
+        minWidth: 100,
+        maxWidth: 100,
+        sortable: false,
+        filter: false,
+        resizable: false,
+      },
       {
         field: "workflow_name",
         headerName: "Workflow",
@@ -178,7 +212,7 @@ export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) 
     []
   );
 
-  const getRowClass = useCallback((params: { data: ExecutionLog }) => {
+  const getRowClass = useCallback((params: { data: ExecutionLog | undefined }) => {
     if (params.data?.status === "error") {
       return "bg-red-500/5";
     }
