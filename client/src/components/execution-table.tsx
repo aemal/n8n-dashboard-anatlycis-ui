@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef, ICellRendererParams, themeQuartz } from "ag-grid-community";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/lib/theme-provider";
@@ -68,6 +68,32 @@ const DurationCellRenderer = (params: ICellRendererParams) => {
   }
   return <span>{(ms / 60000).toFixed(1)}m</span>;
 };
+
+const lightTheme = themeQuartz.withParams({
+  backgroundColor: "#ffffff",
+  headerBackgroundColor: "#f4f4f5",
+  oddRowBackgroundColor: "#ffffff",
+  rowHoverColor: "#f4f4f5",
+  borderColor: "#e4e4e7",
+  headerTextColor: "#09090b",
+  textColor: "#09090b",
+  fontSize: 14,
+  headerHeight: 48,
+  rowHeight: 48,
+});
+
+const darkTheme = themeQuartz.withParams({
+  backgroundColor: "#18181b",
+  headerBackgroundColor: "#27272a",
+  oddRowBackgroundColor: "#18181b",
+  rowHoverColor: "#27272a",
+  borderColor: "#3f3f46",
+  headerTextColor: "#fafafa",
+  textColor: "#fafafa",
+  fontSize: 14,
+  headerHeight: 48,
+  rowHeight: 48,
+});
 
 export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) {
   const { resolvedTheme } = useTheme();
@@ -159,6 +185,8 @@ export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) 
     return "";
   }, []);
 
+  const gridTheme = resolvedTheme === "dark" ? darkTheme : lightTheme;
+
   if (isLoading) {
     return (
       <Card className="shadow-sm">
@@ -201,24 +229,7 @@ export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) 
         <CardTitle className="text-lg font-semibold">Execution Logs</CardTitle>
       </CardHeader>
       <CardContent>
-        <div
-          className="h-[500px] w-full ag-theme-quartz"
-          style={{
-            "--ag-background-color": "hsl(var(--card))",
-            "--ag-header-background-color": "hsl(var(--muted))",
-            "--ag-odd-row-background-color": "hsl(var(--card))",
-            "--ag-row-hover-color": "hsl(var(--accent))",
-            "--ag-selected-row-background-color": "hsl(var(--primary) / 0.1)",
-            "--ag-border-color": "hsl(var(--border))",
-            "--ag-header-foreground-color": "hsl(var(--foreground))",
-            "--ag-foreground-color": "hsl(var(--foreground))",
-            "--ag-font-family": "var(--font-sans)",
-            "--ag-font-size": "14px",
-            "--ag-row-height": "48px",
-            "--ag-header-height": "48px",
-          } as React.CSSProperties}
-          data-testid="execution-table"
-        >
+        <div className="h-[500px] w-full" data-testid="execution-table">
           <AgGridReact
             rowData={data}
             columnDefs={columnDefs}
@@ -230,7 +241,7 @@ export function ExecutionTable({ data, isLoading, error }: ExecutionTableProps) 
             paginationPageSizeSelector={[10, 25, 50, 100]}
             domLayout="normal"
             suppressMovableColumns={true}
-            theme="legacy"
+            theme={gridTheme}
           />
         </div>
       </CardContent>
