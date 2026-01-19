@@ -1,22 +1,22 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   console.warn(
-    "Warning: SUPABASE_URL or SUPABASE_ANON_KEY not set. API calls will fail."
+    "Warning: SUPABASE_URL or SUPABASE_SERVICE_KEY not set. API calls will fail."
   );
 }
 
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
 export function getSupabase() {
   if (!supabase) {
     throw new Error(
-      "Supabase client not initialized. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables."
+      "Supabase client not initialized. Please set SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables."
     );
   }
   return supabase;
